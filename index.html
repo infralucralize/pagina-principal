@@ -35,9 +35,42 @@
     width: 100% !important;
     height: 100% !important;
   }
-  .chart-box-donut {
-    height: 280px;
+  .bar-legend {
+    display: flex;
+    gap: 18px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
   }
+  .bar-legend .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  .dot-a { background: #7dd3e8; }
+  .dot-b { background: #ff4d5e; }
+  .progress-bar {
+    display: flex;
+    height: 34px;
+    border-radius: 17px;
+    overflow: hidden;
+    background: #2a2f45;
+  }
+  .segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0d1117;
+    font-weight: 800;
+    font-size: 14px;
+    transition: width 0.4s ease;
+    white-space: nowrap;
+  }
+  .segment-a { background: #7dd3e8; }
+  .segment-b { background: #ff4d5e; }
   .center-value {
     position: absolute;
     top: 62%;
@@ -76,9 +109,14 @@
     </div>
     <div class="card">
       <h3>Distribuição de Clientes</h3>
-      <p class="sub">Clientes Contabilidade / Clientes Tech</p>
-      <div class="chart-box chart-box-donut">
-        <canvas id="donut"></canvas>
+      <p class="sub" id="periodoDistribuicao">&nbsp;</p>
+      <div class="bar-legend">
+        <span><span class="dot dot-a"></span>Clientes Contabilidade (<span id="valA">–</span>)</span>
+        <span><span class="dot dot-b"></span>Clientes Tech (<span id="valB">–</span>)</span>
+      </div>
+      <div class="progress-bar">
+        <div id="segA" class="segment segment-a" style="width:50%"></div>
+        <div id="segB" class="segment segment-b" style="width:50%"></div>
       </div>
     </div>
   </div>
@@ -95,8 +133,10 @@ async function carregar() {
     if (!resp.ok) throw new Error("Falha ao buscar dados (" + resp.status + ")");
     const d = await resp.json();
     renderGauge(d.total, d.meta);
-    renderDonut(d.totalClientesContabilidade, d.totalClientesTech);
+    renderDistribuicao(d.totalClientesContabilidade, d.totalClientesTech);
     document.getElementById("periodo").textContent =
+      "Atualizado em " + new Date(d.atualizadoEm).toLocaleString("pt-BR");
+    document.getElementById("periodoDistribuicao").textContent =
       "Atualizado em " + new Date(d.atualizadoEm).toLocaleString("pt-BR");
   } catch (err) {
     document.getElementById("errorMsg").textContent =
@@ -129,49 +169,23 @@ function renderGauge(valor, meta) {
   document.getElementById("metaLabel").textContent = meta;
 }
 
-function renderDonut(clientesContabilidade, clientesTech) {
-  const ctx = document.getElementById("donut");
-  new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: [
-        `Clientes Contabilidade (${clientesContabilidade})`,
-        `Clientes Tech (${clientesTech})`,
-      ],
-      datasets: [{
-        data: [clientesContabilidade, clientesTech],
-        backgroundColor: ["#7dd3e8", "#ff4d5e"],
-        borderWidth: 0,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: "60%",
-      plugins: {
-        legend: { position: "top", labels: { color: "#fff", boxWidth: 12, font: { size: 11 } } },
-        tooltip: { enabled: true },
-      },
-    },
-    plugins: [{
-      id: "valoresNasFatias",
-      afterDraw(chart) {
-        const { ctx, data } = chart;
-        ctx.save();
-        ctx.font = "bold 13px -apple-system, Segoe UI, Roboto, sans-serif";
-        ctx.fillStyle = "#0d1117";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        chart.getDatasetMeta(0).data.forEach((arc, i) => {
-          const valor = data.datasets[0].data[i];
-          if (!valor) return;
-          const pos = arc.tooltipPosition();
-          ctx.fillText(String(valor), pos.x, pos.y);
-        });
-        ctx.restore();
-      },
-    }],
-  });
+function renderDistribuicao(clientesContabilidade, clientesTech) {
+  const total = clientesContabilidade + clientesTech;
+  const pctA = total > 0 ? (clientesContabilidade / total) * 100 : 50;
+  const pctB = 100 - pctA;
+
+  const segA = document.getElementById("segA");
+  const segB = document.getElementById("segB");
+
+  segA.style.width = pctA + "%";
+  segB.style.width = pctB + "%";
+
+  // só escreve o número dentro do segmento se ele tiver espaço mínimo pra caber
+  segA.textContent = pctA > 12 ? clientesContabilidade : "";
+  segB.textContent = pctB > 12 ? clientesTech : "";
+
+  document.getElementById("valA").textContent = clientesContabilidade;
+  document.getElementById("valB").textContent = clientesTech;
 }
 
 carregar();
