@@ -2,74 +2,119 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8" />
-<title>Teste — Listas SharePoint via iframe</title>
+<title>Meta de Clientes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   body {
     margin: 0;
-    background: #0d1117;
-    color: #fff;
+    background: transparent;
     font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-    padding: 16px;
+    color: #ffffff;
   }
   .wrap {
     display: flex;
     flex-wrap: wrap;
-    gap: 24px;
+    gap: 32px;
+    padding: 12px;
   }
   .card {
-    flex: 1 1 480px;
-    min-width: 320px;
+    flex: 1 1 320px;
+    min-width: 280px;
   }
-  h3 { margin: 0 0 8px 0; font-size: 18px; }
-  .frame-box {
-    position: relative;
-    border: 1px solid #2a2f45;
-    border-radius: 8px;
-    overflow: hidden;
-    height: 480px;
+  h3 { margin: 0 0 4px 0; font-size: 20px; }
+  p.sub { margin: 0 0 16px 0; opacity: 0.7; font-size: 13px; }
+  .center-value {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 800;
+    margin-top: -170px;
+    pointer-events: none;
   }
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-  }
-  .status {
-    font-size: 13px;
-    opacity: 0.7;
-    margin-top: 6px;
-  }
+  .error { color: #ff6b6b; font-size: 14px; }
 </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h3>Controle de Clientes</h3>
-      <div class="frame-box">
-        <iframe
-          src="https://lucralize.sharepoint.com/:l:/g/JAAzgvOwTpgNTY29P1sTtj6RAUsRPHcRwWn7sBGB7zdYOBc?e=5yh91k"
-          title="Controle de Clientes"
-          onerror="marcarErro('status-clientes')"
-        ></iframe>
-      </div>
-      <p class="status" id="status-clientes">Se aparecer em branco, tela de login, ou "recusou conexão" → o SharePoint bloqueou o iframe por estar fora do domínio do tenant.</p>
+      <h3>Meta de Clientes 2026</h3>
+      <p class="sub" id="periodo">carregando…</p>
+      <canvas id="gauge" height="220"></canvas>
+      <div class="center-value" id="gaugeValue"></div>
     </div>
     <div class="card">
-      <h3>Base de Usuários</h3>
-      <div class="frame-box">
-        <iframe
-          src="https://lucralize.sharepoint.com/:l:/s/LUCRALIZETECH/JABuqE-i2q-IRZ_3QQ8VkLtkAcb-dIri0eubZOzglsLireo?e=ZQ9Mew"
-          title="Base de Usuários"
-          onerror="marcarErro('status-usuarios')"
-        ></iframe>
-      </div>
-      <p class="status" id="status-usuarios">Se aparecer em branco, tela de login, ou "recusou conexão" → o SharePoint bloqueou o iframe por estar fora do domínio do tenant.</p>
+      <h3>Distribuição de Clientes</h3>
+      <p class="sub">Total de Clientes / Total de Usuários</p>
+      <canvas id="donut" height="220"></canvas>
     </div>
   </div>
+  <div id="errorMsg" class="error"></div>
 
 <script>
-function marcarErro(id) {
-  document.getElementById(id).textContent = "Erro ao carregar — provável bloqueio de X-Frame-Options/CSP.";
+// Caminho relativo dentro do mesmo repositório/GitHub Pages — atualizado
+// automaticamente pelo GitHub Actions (.github/workflows/atualizar-dados.yml)
+const ENDPOINT = "./data/dados.json";
+
+async function carregar() {
+  try {
+    const resp = await fetch(ENDPOINT, { cache: "no-store" });
+    if (!resp.ok) throw new Error("Falha ao buscar dados (" + resp.status + ")");
+    const d = await resp.json();
+    renderGauge(d.total, d.meta);
+    renderDonut(d.totalClientes, d.totalUsuarios);
+    document.getElementById("periodo").textContent =
+      "Atualizado em " + new Date(d.atualizadoEm).toLocaleString("pt-BR");
+  } catch (err) {
+    document.getElementById("errorMsg").textContent =
+      "Não foi possível carregar os dados agora. Tente novamente em instantes.";
+    console.error(err);
+  }
 }
+
+function renderGauge(valor, meta) {
+  const ctx = document.getElementById("gauge");
+  const pct = Math.min(valor / meta, 1);
+  new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      datasets: [{
+        data: [valor, Math.max(meta - valor, 0)],
+        backgroundColor: ["#7dd3e8", "#2a2f45"],
+        borderWidth: 0,
+      }],
+    },
+    options: {
+      circumference: 180,
+      rotation: 270,
+      cutout: "70%",
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    },
+  });
+  document.getElementById("gaugeValue").textContent = valor;
+}
+
+function renderDonut(clientes, usuarios) {
+  const ctx = document.getElementById("donut");
+  new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Total de Clientes", "Total de Usuários"],
+      datasets: [{
+        data: [clientes, usuarios],
+        backgroundColor: ["#7dd3e8", "#ff4d5e"],
+        borderWidth: 0,
+      }],
+    },
+    options: {
+      cutout: "60%",
+      plugins: {
+        legend: { position: "top", labels: { color: "#fff" } },
+      },
+    },
+  });
+}
+
+carregar();
+setInterval(carregar, 5 * 60 * 1000); // atualiza a cada 5 min
 </script>
 </body>
 </html>
