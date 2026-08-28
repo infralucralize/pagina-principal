@@ -2,8 +2,8 @@ name: Atualizar dados de clientes
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # a cada 15 minutos
-  workflow_dispatch: {}       # permite rodar manualmente pelo botao "Run workflow"
+    - cron: "* * * * *" # TESTE: a cada 1 minuto — voltar para */15 depois de confirmar
+  workflow_dispatch: {} # permite rodar manualmente pelo botao "Run workflow"
 
 permissions:
   contents: write
