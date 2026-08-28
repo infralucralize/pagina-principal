@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<title>Teste — Listas SharePoint via iframe</title>
+<style>
+  body {
+    margin: 0;
+    background: #0d1117;
+    color: #fff;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 16px;
+  }
+  .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .card {
+    flex: 1 1 480px;
+    min-width: 320px;
+  }
+  h3 { margin: 0 0 8px 0; font-size: 18px; }
+  .frame-box {
+    position: relative;
+    border: 1px solid #2a2f45;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 480px;
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .status {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h3>Controle de Clientes</h3>
+      <div class="frame-box">
+        <iframe
+          src="https://lucralize.sharepoint.com/:l:/g/JAAzgvOwTpgNTY29P1sTtj6RAUsRPHcRwWn7sBGB7zdYOBc?e=5yh91k"
+          title="Controle de Clientes"
+          onerror="marcarErro('status-clientes')"
+        ></iframe>
+      </div>
+      <p class="status" id="status-clientes">Se aparecer em branco, tela de login, ou "recusou conexão" → o SharePoint bloqueou o iframe por estar fora do domínio do tenant.</p>
+    </div>
+    <div class="card">
+      <h3>Base de Usuários</h3>
+      <div class="frame-box">
+        <iframe
+          src="https://lucralize.sharepoint.com/:l:/s/LUCRALIZETECH/JABuqE-i2q-IRZ_3QQ8VkLtkAcb-dIri0eubZOzglsLireo?e=ZQ9Mew"
+          title="Base de Usuários"
+          onerror="marcarErro('status-usuarios')"
+        ></iframe>
+      </div>
+      <p class="status" id="status-usuarios">Se aparecer em branco, tela de login, ou "recusou conexão" → o SharePoint bloqueou o iframe por estar fora do domínio do tenant.</p>
+    </div>
+  </div>
+
+<script>
+function marcarErro(id) {
+  document.getElementById(id).textContent = "Erro ao carregar — provável bloqueio de X-Frame-Options/CSP.";
+}
+</script>
+</body>
+</html>
