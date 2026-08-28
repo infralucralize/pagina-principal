@@ -5,8 +5,11 @@
 <title>Meta de Clientes</title>
 <script src="./libs/chart.umd.js"></script>
 <style>
-  body {
+  html, body {
     margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
     background: transparent;
     font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
     color: #ffffff;
@@ -14,23 +17,35 @@
   .wrap {
     display: flex;
     flex-wrap: wrap;
-    gap: 32px;
-    padding: 12px;
+    gap: 24px;
+    padding: 10px 14px;
+    box-sizing: border-box;
   }
   .card {
-    flex: 1 1 320px;
-    min-width: 280px;
+    flex: 1 1 280px;
+    min-width: 240px;
   }
-  h3 { margin: 0 0 4px 0; font-size: 20px; }
-  p.sub { margin: 0 0 16px 0; opacity: 0.7; font-size: 13px; }
+  h3 { margin: 0 0 2px 0; font-size: 16px; }
+  p.sub { margin: 0 0 8px 0; opacity: 0.7; font-size: 11px; }
+  .chart-box {
+    position: relative;
+    height: 150px;
+  }
+  .chart-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
   .center-value {
+    position: absolute;
+    top: 62%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
-    font-size: 36px;
+    font-size: 28px;
     font-weight: 800;
-    margin-top: -170px;
     pointer-events: none;
   }
-  .error { color: #ff6b6b; font-size: 14px; }
+  .error { color: #ff6b6b; font-size: 13px; padding: 0 14px; }
 </style>
 </head>
 <body>
@@ -38,13 +53,17 @@
     <div class="card">
       <h3>Meta de Clientes 2026</h3>
       <p class="sub" id="periodo">carregando…</p>
-      <canvas id="gauge" height="220"></canvas>
-      <div class="center-value" id="gaugeValue"></div>
+      <div class="chart-box">
+        <canvas id="gauge"></canvas>
+        <div class="center-value" id="gaugeValue"></div>
+      </div>
     </div>
     <div class="card">
       <h3>Distribuição de Clientes</h3>
       <p class="sub">Total de Clientes / Total de Usuários</p>
-      <canvas id="donut" height="220"></canvas>
+      <div class="chart-box">
+        <canvas id="donut"></canvas>
+      </div>
     </div>
   </div>
   <div id="errorMsg" class="error"></div>
@@ -83,6 +102,8 @@ function renderGauge(valor, meta) {
       }],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       circumference: 180,
       rotation: 270,
       cutout: "70%",
@@ -105,9 +126,11 @@ function renderDonut(clientes, usuarios) {
       }],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       cutout: "60%",
       plugins: {
-        legend: { position: "top", labels: { color: "#fff" } },
+        legend: { position: "top", labels: { color: "#fff", boxWidth: 12, font: { size: 11 } } },
       },
     },
   });
