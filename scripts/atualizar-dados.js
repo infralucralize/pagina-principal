@@ -16,6 +16,10 @@ const USUARIOS = {
   listId: "a24fa86e-afda-4588-9ff7-410f1590bb64",
 };
 
+// Nome interno da coluna "Situação" — igual nas duas listas
+const CAMPO_SITUACAO = "Situa_x00e7__x00e3_o";
+const STATUS_VALIDO = "ATIVO";
+
 const META_FIXED_VALUE = Number(process.env.META_FIXED_VALUE || 585);
 
 const msalClient = new ConfidentialClientApplication({
@@ -33,9 +37,13 @@ async function getAppToken() {
   return result.accessToken;
 }
 
-async function countListItems(token, { siteId, listId }) {
+// Conta só os itens com Situação = ATIVO. Precisa trazer os campos (expand=fields)
+// porque agora filtramos por valor, não só contamos itens brutos.
+async function countAtivos(token, { siteId, listId }) {
   let count = 0;
-  let nextUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/lists/${listId}/items?$select=id&$top=999`;
+  let nextUrl =
+    `https://graph.microsoft.com/v1.0/sites/${siteId}/lists/${listId}/items` +
+    `?expand=fields(select=${CAMPO_SITUACAO})&$top=999`;
 
   while (nextUrl) {
     const resp = await fetch(nextUrl, {
@@ -46,7 +54,11 @@ async function countListItems(token, { siteId, listId }) {
       throw new Error(`Graph API respondeu ${resp.status} para siteId=${siteId}: ${body}`);
     }
     const json = await resp.json();
-    count += json.value.length;
+    for (const item of json.value) {
+      if (item.fields && item.fields[CAMPO_SITUACAO] === STATUS_VALIDO) {
+        count++;
+      }
+    }
     nextUrl = json["@odata.nextLink"] || null;
   }
   return count;
@@ -55,15 +67,15 @@ async function countListItems(token, { siteId, listId }) {
 async function main() {
   const token = await getAppToken();
 
-  const [totalClientes, totalUsuarios] = await Promise.all([
-    countListItems(token, CLIENTES),
-    countListItems(token, USUARIOS),
+  const [totalClientesContabilidade, totalClientesTech] = await Promise.all([
+    countAtivos(token, CLIENTES),
+    countAtivos(token, USUARIOS),
   ]);
 
   const data = {
-    totalClientes,
-    totalUsuarios,
-    total: totalClientes + totalUsuarios,
+    totalClientesContabilidade,
+    totalClientesTech,
+    total: totalClientesContabilidade + totalClientesTech,
     meta: META_FIXED_VALUE,
     atualizadoEm: new Date().toISOString(),
   };
