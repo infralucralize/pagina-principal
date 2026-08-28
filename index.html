@@ -46,12 +46,16 @@
     pointer-events: none;
   }
   .gauge-labels {
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
-    opacity: 0.7;
-    margin-top: -6px;
-    padding: 0 4px;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0.85;
+    pointer-events: none;
   }
   .error { color: #ff6b6b; font-size: 13px; padding: 0 14px; }
 </style>
@@ -64,10 +68,10 @@
       <div class="chart-box">
         <canvas id="gauge"></canvas>
         <div class="center-value" id="gaugeValue"></div>
-      </div>
-      <div class="gauge-labels">
-        <span>0</span>
-        <span id="metaLabel"></span>
+        <div class="gauge-labels">
+          <span>0</span>
+          <span id="metaLabel"></span>
+        </div>
       </div>
     </div>
     <div class="card">
