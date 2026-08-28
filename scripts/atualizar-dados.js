@@ -20,7 +20,7 @@ const USUARIOS = {
 const CAMPO_SITUACAO = "Situa_x00e7__x00e3_o";
 const STATUS_VALIDO = "ATIVO";
 
-const META_FIXED_VALUE = Number(process.env.META_FIXED_VALUE || 585);
+const META_FIXED_VALUE = Number(process.env.META_FIXED_VALUE || 750);
 
 const msalClient = new ConfidentialClientApplication({
   auth: {
