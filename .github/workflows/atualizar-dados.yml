@@ -1,9 +1,7 @@
 name: Atualizar dados de clientes
 
 on:
-  schedule:
-    - cron: "* * * * *" # TESTE: a cada 1 minuto — voltar para */15 depois de confirmar
-  workflow_dispatch: {} # permite rodar manualmente pelo botao "Run workflow"
+  workflow_dispatch: {} # disparado pelo cron-job.org via API, ou manualmente aqui
 
 permissions:
   contents: write
