@@ -35,9 +35,15 @@
     width: 100% !important;
     height: 100% !important;
   }
+  .bar-content {
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   .bar-legend {
     display: flex;
-    gap: 18px;
+    justify-content: space-between;
     font-size: 13px;
     font-weight: 700;
     margin-bottom: 10px;
@@ -110,13 +116,15 @@
     <div class="card">
       <h3>Distribuição de Clientes</h3>
       <p class="sub" id="periodoDistribuicao">&nbsp;</p>
-      <div class="bar-legend">
-        <span><span class="dot dot-a"></span>Clientes Contabilidade (<span id="valA">–</span>)</span>
-        <span><span class="dot dot-b"></span>Clientes Tech (<span id="valB">–</span>)</span>
-      </div>
-      <div class="progress-bar">
-        <div id="segA" class="segment segment-a" style="width:50%"></div>
-        <div id="segB" class="segment segment-b" style="width:50%"></div>
+      <div class="bar-content">
+        <div class="bar-legend">
+          <span><span class="dot dot-a"></span>Clientes Contabilidade (<span id="valA">–</span>)</span>
+          <span>Clientes Tech (<span id="valB">–</span>)<span class="dot dot-b" style="margin-right:0; margin-left:6px;"></span></span>
+        </div>
+        <div class="progress-bar">
+          <div id="segA" class="segment segment-a" style="width:50%"></div>
+          <div id="segB" class="segment segment-b" style="width:50%"></div>
+        </div>
       </div>
     </div>
   </div>
