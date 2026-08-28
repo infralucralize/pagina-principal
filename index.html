@@ -60,7 +60,7 @@
     </div>
     <div class="card">
       <h3>Distribuição de Clientes</h3>
-      <p class="sub">Total de Clientes / Total de Usuários</p>
+      <p class="sub">Clientes Contabilidade / Clientes Tech</p>
       <div class="chart-box">
         <canvas id="donut"></canvas>
       </div>
@@ -79,7 +79,7 @@ async function carregar() {
     if (!resp.ok) throw new Error("Falha ao buscar dados (" + resp.status + ")");
     const d = await resp.json();
     renderGauge(d.total, d.meta);
-    renderDonut(d.totalClientes, d.totalUsuarios);
+    renderDonut(d.totalClientesContabilidade, d.totalClientesTech);
     document.getElementById("periodo").textContent =
       "Atualizado em " + new Date(d.atualizadoEm).toLocaleString("pt-BR");
   } catch (err) {
@@ -113,14 +113,14 @@ function renderGauge(valor, meta) {
   document.getElementById("gaugeValue").textContent = valor;
 }
 
-function renderDonut(clientes, usuarios) {
+function renderDonut(clientesContabilidade, clientesTech) {
   const ctx = document.getElementById("donut");
   new Chart(ctx, {
     type: "doughnut",
     data: {
-      labels: ["Total de Clientes", "Total de Usuários"],
+      labels: ["Clientes Contabilidade", "Clientes Tech"],
       datasets: [{
-        data: [clientes, usuarios],
+        data: [clientesContabilidade, clientesTech],
         backgroundColor: ["#7dd3e8", "#ff4d5e"],
         borderWidth: 0,
       }],
