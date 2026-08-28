@@ -45,6 +45,14 @@
     font-weight: 800;
     pointer-events: none;
   }
+  .gauge-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: -6px;
+    padding: 0 4px;
+  }
   .error { color: #ff6b6b; font-size: 13px; padding: 0 14px; }
 </style>
 </head>
@@ -56,6 +64,10 @@
       <div class="chart-box">
         <canvas id="gauge"></canvas>
         <div class="center-value" id="gaugeValue"></div>
+      </div>
+      <div class="gauge-labels">
+        <span>0</span>
+        <span id="metaLabel"></span>
       </div>
     </div>
     <div class="card">
@@ -111,6 +123,7 @@ function renderGauge(valor, meta) {
     },
   });
   document.getElementById("gaugeValue").textContent = valor;
+  document.getElementById("metaLabel").textContent = meta;
 }
 
 function renderDonut(clientesContabilidade, clientesTech) {
@@ -118,7 +131,10 @@ function renderDonut(clientesContabilidade, clientesTech) {
   new Chart(ctx, {
     type: "doughnut",
     data: {
-      labels: ["Clientes Contabilidade", "Clientes Tech"],
+      labels: [
+        `Clientes Contabilidade (${clientesContabilidade})`,
+        `Clientes Tech (${clientesTech})`,
+      ],
       datasets: [{
         data: [clientesContabilidade, clientesTech],
         backgroundColor: ["#7dd3e8", "#ff4d5e"],
@@ -131,8 +147,27 @@ function renderDonut(clientesContabilidade, clientesTech) {
       cutout: "60%",
       plugins: {
         legend: { position: "top", labels: { color: "#fff", boxWidth: 12, font: { size: 11 } } },
+        tooltip: { enabled: true },
       },
     },
+    plugins: [{
+      id: "valoresNasFatias",
+      afterDraw(chart) {
+        const { ctx, data } = chart;
+        ctx.save();
+        ctx.font = "bold 13px -apple-system, Segoe UI, Roboto, sans-serif";
+        ctx.fillStyle = "#0d1117";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        chart.getDatasetMeta(0).data.forEach((arc, i) => {
+          const valor = data.datasets[0].data[i];
+          if (!valor) return;
+          const pos = arc.tooltipPosition();
+          ctx.fillText(String(valor), pos.x, pos.y);
+        });
+        ctx.restore();
+      },
+    }],
   });
 }
 
